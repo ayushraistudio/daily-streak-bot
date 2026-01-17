@@ -1,15 +1,22 @@
-name: Super Streak Bot
+name: Super Streak Bot (Manual Control)
 
 on:
   schedule:
-    # UTC Times for IST Conversion:
-    # 06:30 UTC = 12:00 PM IST (Normal)
-    # 14:30 UTC = 08:00 PM IST (30 Commits Blast)
-    # 16:30 UTC = 10:00 PM IST (Cleanup)
-    # 18:30 UTC = 12:00 AM IST (Normal)
+    # Schedule wahi purana wala (Automatic)
     - cron: '30 6,14,16,18 * * *'
   
+  # Yahan humne NAYA feature add kiya hai dropdown menu ka
   workflow_dispatch:
+    inputs:
+      force_mode:
+        description: 'Manual Mode Select Karo'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+        - auto
+        - blast_30
+        - cleanup
 
 permissions:
   contents: write
@@ -30,16 +37,19 @@ jobs:
           git config --global user.name "$USER_NAME"
           git config --global user.email "$USER_EMAIL"
 
-      - name: 🚀 Run Logic Based on Time
+      - name: 🚀 Run Logic
+        env:
+          # Manual input ko read kar rahe hain
+          MANUAL_MODE: ${{ inputs.force_mode }}
         run: |
-          # Current Hour (UTC) nikal rahe hain logic decide karne ke liye
           current_hour=$(date -u +%H)
-          
           echo "Current UTC Hour: $current_hour"
+          echo "Selected Mode: $MANUAL_MODE"
 
-          if [ "$current_hour" -eq "14" ]; then
-            # --- 8 PM IST Logic (30 Commits) ---
-            echo "🔥 8 PM Blast Mode: Generating 30 commits..."
+          # Logic: Agar Time 14 (8PM) hai -OR- Tumne manually 'blast_30' select kiya
+          if [ "$current_hour" -eq "14" ] || [ "$MANUAL_MODE" == "blast_30" ]; then
+            
+            echo "🔥 Blast Mode Activated: Generating 30 commits..."
             for i in {1..30}
             do
               echo "Commit number $i at $(date)" >> activity_log.txt
@@ -47,15 +57,16 @@ jobs:
               git commit -m "chore(bot): rapid fire commit $i 🚀"
             done
             
-          elif [ "$current_hour" -eq "16" ]; then
-            # --- 10 PM IST Logic (Cleanup) ---
-            echo "🧹 10 PM Cleanup Mode: Resetting file..."
+          # Logic: Agar Time 16 (10PM) hai -OR- Tumne manually 'cleanup' select kiya
+          elif [ "$current_hour" -eq "16" ] || [ "$MANUAL_MODE" == "cleanup" ]; then
+            
+            echo "🧹 Cleanup Mode Activated..."
             echo "Log reset at $(date)" > activity_log.txt
             git add activity_log.txt
             git commit -m "chore(cleanup): cleaning up daily logs 🧹"
 
           else
-            # --- Normal Logic (12 PM & 12 AM) ---
+            # Normal Routine
             echo "✅ Normal Update Mode"
             echo "Routine check: $(date)" >> activity_log.txt
             git add activity_log.txt
