@@ -1,0 +1,45 @@
+name: Activity Keeper Bot
+
+on:
+  schedule:
+    # Runs at 06:30 UTC (12:00 PM IST) and 18:30 UTC (12:00 AM IST)
+    - cron: '30 6,18 * * *'
+  
+  # Allows manual trigger from Actions tab for testing
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 📝 Update Log File
+        run: |
+          # Ek professional log entry add karega timestamp ke saath
+          echo "✅ Activity Check: $(date)" > activity_log.txt
+          
+      - name: 🚀 Commit and Push
+        env:
+          # Secret se email uthayega (Jo tum settings me set karoge)
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+          USER_NAME: ${{ github.repository_owner }} # Tumhara username automatic utha lega
+        run: |
+          git config --global user.name "$USER_NAME"
+          git config --global user.email "$USER_EMAIL"
+          
+          # Check karega agar kuch change hua hai to hi commit kare
+          if [[ -n $(git status -s) ]]; then
+            git add activity_log.txt
+            git commit -m "chore(bot): automated activity log update 🟢"
+            git push
+            echo "Successfully pushed changes."
+          else
+            echo "No changes to commit."
+          fi
+          
