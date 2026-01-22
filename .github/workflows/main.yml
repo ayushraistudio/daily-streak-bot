@@ -46,14 +46,14 @@ jobs:
           
           # Default Commit Count set kar rahe hain din ke hisaab se
           case $day_of_week in
-            1) count=32 ;; # Monday
-            2) count=28 ;; # Tuesday
-            3) count=37 ;; # Wednesday
-            4) count=26 ;; # Thursday
-            5) count=22 ;; # Friday
-            6) count=47 ;; # Saturday
-            7) count=34 ;; # Sunday
-            *) count=30 ;; # Backup (just in case)
+            1) count=1 ;; # Monday
+            2) count=2 ;; # Tuesday
+            3) count=3 ;; # Wednesday
+            4) count=4 ;; # Thursday
+            5) count=3 ;; # Friday
+            6) count=5 ;; # Saturday
+            7) count=2 ;; # Sunday
+            *) count=1 ;; # Backup (just in case)
           esac
 
           echo "📅 Aaj Day-$day_of_week hai. Target Commits: $count"
